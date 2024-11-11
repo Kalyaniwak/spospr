@@ -1,0 +1,146 @@
+import java.util.Scanner;
+
+public class SchedulingAlgorithms {
+    public static void main(String[] args) {
+        Scanner sc = new Scanner(System.in);
+        int choice;
+
+        while (true) {
+            System.out.println("\nSelect a Scheduling Algorithm:");
+            System.out.println("1. First-Come, First-Serve (FCFS)");
+            System.out.println("2. Round Robin");
+            System.out.println("3. Exit");
+            System.out.print("Enter your choice: ");
+            choice = sc.nextInt();
+
+            switch (choice) {
+                case 1:
+                    fcfs();
+                    break;
+                case 2:
+                    roundRobin();
+                    break;
+                case 3:
+                    System.out.println("Exiting...");
+                    sc.close();
+                    return;
+                default:
+                    System.out.println("Invalid choice, please try again.");
+            }
+        }
+    }
+    public static void fcfs() {
+        Scanner sc = new Scanner(System.in);
+        System.out.print("Enter number of processes: ");
+        int n = sc.nextInt();
+        int[] pid = new int[n];
+        int[] ar = new int[n];
+        int[] bt = new int[n];
+        int[] ct = new int[n];
+        int[] ta = new int[n];
+        int[] wt = new int[n];
+        int temp;
+        float avgwt = 0, avgta = 0;
+
+        for (int i = 0; i < n; i++) {
+            System.out.print("Enter process " + (i + 1) + " arrival time: ");
+            ar[i] = sc.nextInt();
+            System.out.print("Enter process " + (i + 1) + " burst time: ");
+            bt[i] = sc.nextInt();
+            pid[i] = i + 1;
+        }
+        // Sorting by arrival times
+        for (int i = 0; i < n; i++) {
+            for (int j = 0; j < n - (i + 1); j++) {
+                if (ar[j] > ar[j + 1]) {
+                    temp = ar[j];
+                    ar[j] = ar[j + 1];
+                    ar[j + 1] = temp;
+                    temp = bt[j];
+                    bt[j] = bt[j + 1];
+                    bt[j + 1] = temp;
+                    temp = pid[j];
+                    pid[j] = pid[j + 1];
+                    pid[j + 1] = temp;
+                }
+            }
+        }
+        // Calculating completion times
+        for (int i = 0; i < n; i++) {
+            if (i == 0) {
+                ct[i] = ar[i] + bt[i];
+            } else {
+                if (ar[i] > ct[i - 1]) {
+                    ct[i] = ar[i] + bt[i];
+                } else {
+                    ct[i] = ct[i - 1] + bt[i];
+                }
+            }
+            ta[i] = ct[i] - ar[i];
+            wt[i] = ta[i] - bt[i];
+            avgwt += wt[i];
+            avgta += ta[i];
+        }
+        System.out.println("----------------------------------------------------------------------------------");
+        System.out.println("\npid\t\t arrival\t\t burst\t\t complete\t\t  turn\t\t waiting");
+        System.out.println("----------------------------------------------------------------------------------");
+
+        for (int i = 0; i < n; i++) {
+            System.out.println(pid[i] + "\t\t" + ar[i] + "\t\t" + bt[i] + "\t\t" + ct[i] + "\t" + ta[i] + "\t" + wt[i]);
+        }
+        System.out.println("\nAverage waiting time: " + (avgwt / n));
+        System.out.println("Average turnaround time: " + (avgta / n));
+    }
+
+    public static void roundRobin() {
+    Scanner s = new Scanner(System.in);
+    System.out.print("Enter the number of processes: ");
+    int n = s.nextInt();
+    int[] bt = new int[n];
+    int[] wt = new int[n];
+    int[] tat = new int[n];
+    int[] rem_bt = new int[n];
+    int qt, count = 0, temp, sq = 0;
+    float awt = 0, atat = 0;
+
+    System.out.print("Enter the burst time of each process\n");
+    for (int i = 0; i < n; i++) {
+        System.out.print("Process " + (i + 1) + " = ");
+        bt[i] = s.nextInt();
+        rem_bt[i] = bt[i];
+    }
+    System.out.print("Enter the quantum time: ");
+    qt = s.nextInt();
+
+    // Round Robin scheduling
+    while (count < n) {
+        for (int i = 0; i < n; i++) {
+            if (rem_bt[i] == 0) {
+                continue; // Skip processes that are already completed
+            }
+
+            temp = Math.min(rem_bt[i], qt); // Determine time slice for the current process
+            rem_bt[i] -= temp;
+            sq += temp;
+            
+            if (rem_bt[i] == 0) {
+                count++; // Increment count when process finishes
+                tat[i] = sq; // Set turnaround time for completed process
+            }
+        }
+    }
+    System.out.println("--------------------------------------------------------------------------------");
+    System.out.println("\nProcess\t\t Burst Time \t\t Turnaround Time \t\t Waiting Time");
+    System.out.println("--------------------------------------------------------------------------------");
+    for (int i = 0; i < n; i++) {
+        wt[i] = tat[i] - bt[i]; // Calculate waiting time for each process
+        awt += wt[i];
+        atat += tat[i];
+        System.out.println(" " + (i + 1) + "\t\t " + bt[i] + "\t\t " + tat[i] + "\t\t " + wt[i]);
+    }
+
+    System.out.println("\nAverage Waiting Time = " + (awt / n));
+    System.out.println("Average Turnaround Time = " + (atat / n));
+}
+
+}
