@@ -1,0 +1,126 @@
+import java.util.Scanner; // Import the Scanner class for user input
+class secontfit {
+    public static void main(String[] args) {
+        Scanner scanner = new Scanner(System.in); // Create a Scanner object for input
+
+        // Input for block sizes
+        System.out.print("Enter the number of memory blocks: ");
+        int m = scanner.nextInt();
+        int blockSize[] = new int[m];
+        System.out.println("Enter the sizes of the blocks:");
+        for (int i = 0; i < m; i++) {
+            blockSize[i] = scanner.nextInt(); // Store block sizes from user
+        }
+        // Input for process sizes
+        System.out.print("Enter the number of processes: ");
+        int n = scanner.nextInt();
+        int processSize[] = new int[n];
+        System.out.println("Enter the sizes of the processes:");
+        for (int i = 0; i < n; i++) {
+            processSize[i] = scanner.nextInt(); // Store process sizes from user
+        }
+        while (true) {
+            System.out.println("\nMemory Allocation Strategies:");
+            System.out.println("1. Worst Fit");
+            System.out.println("2. Next Fit");
+            System.out.println("3. Exit");
+            System.out.print("Choose a strategy (1-3): ");
+            int choice = scanner.nextInt();
+
+            switch (choice) {
+                case 1:
+                    implementWorstFit(blockSize.clone(), m, processSize, n);
+                    break;
+                case 2:
+                    implementNextFit(blockSize.clone(), m, processSize, n);
+                    break;
+                case 3:
+                    System.out.println("Exiting...");
+                    scanner.close();
+                    return; // Exit the program
+                default:
+                    System.out.println("Invalid choice! Please select again.");
+            }
+        }
+    }
+    // Worst Fit implementation
+  static void implementWorstFit(int blockSize[], int blocks, int processSize[], int processes) {
+    int allocate[] = new int[processes];
+    boolean[] blockUsed = new boolean[blocks]; // Array to track if a block has been used
+    
+    // Initialize allocations to -1, meaning "Not Allocated"
+    for (int i = 0; i < processes; i++) {
+        allocate[i] = -1;
+    }
+
+    // Try to allocate each process
+    for (int i = 0; i < processes; i++) {
+        int worstIdx = -1; // Reset the index for the worst (largest) block
+
+        // Find the block with the largest available size that can fit the current process
+        for (int j = 0; j < blocks; j++) {
+            if (!blockUsed[j] && blockSize[j] >= processSize[i]) { // Block must not be used and must fit the process
+                if (worstIdx == -1 || blockSize[worstIdx] < blockSize[j]) {
+                    worstIdx = j; // Update worstIdx to the index of this larger block
+                }
+            }
+        }
+
+        // If a suitable block was found, allocate the process to it
+        if (worstIdx != -1) {
+            allocate[i] = worstIdx; // Assign this block to the current process
+            blockUsed[worstIdx] = true; // Mark this block as used
+            blockSize[worstIdx] -= processSize[i]; // Reduce the block size
+        }
+    }
+
+    // Print the allocation results
+    printAllocationResults(processSize, allocate);
+}
+// next fit
+    static void implementNextFit(int blockSize[], int blocks, int processSize[], int processes) {
+    int allocate[] = new int[processes];
+    boolean[] blockUsed = new boolean[blocks]; // Array to track if a block has been used
+    int j = 0; // This keeps track of the current block to start looking for the next available block
+                                   
+    for (int i = 0; i < processes; i++) {
+        allocate[i] = -1;   // Initialize allocations to -1, meaning "Not Allocated"
+    }
+
+    // Try to allocate each process
+    for (int i = 0; i < processes; i++) {
+        boolean allocated = false; // Flag to check if process has been allocated
+
+        // Start searching from the current block j and move forward
+        for (int k = 0; k < blocks; k++) {
+            int currentBlock = (j + k) % blocks; // Wrapping around to the start if needed
+            if (!blockUsed[currentBlock] && blockSize[currentBlock] >= processSize[i]) { // Block must not be used and must fit the process
+                allocate[i] = currentBlock; // Allocate the block to the process
+                blockUsed[currentBlock] = true; // Mark the block as used
+                blockSize[currentBlock] -= processSize[i]; // Reduce the block size
+                j = (currentBlock + 1) % blocks; // Move to the next block
+                allocated = true;
+                break;
+            }
+        }
+        if (!allocated) {
+            System.out.println("Process " + (i + 1) + " (size: " + processSize[i] + ") Not Allocated");
+        } else {
+            System.out.println("Process " + (i + 1) + " (size: " + processSize[i] + ") allocated to Block " + (allocate[i] + 1));
+        }
+    }
+    // Print the final allocation results
+    printAllocationResults(processSize, allocate);
+}
+    // Method to print allocation results
+    static void printAllocationResults(int processSize[], int allocate[]) {
+        System.out.println("\nProcess No.\tProcess Size\tBlock no.\n");
+        for (int i = 0; i < processSize.length; i++) {
+            System.out.print(i + 1 + "\t\t\t" + processSize[i] + "\t\t\t");
+            if (allocate[i] != -1)
+                System.out.println(allocate[i] + 1); // Print block number (1-based)
+            else
+                System.out.println("Not Allocated"); // Indicate if not allocated
+        }
+    }
+}
