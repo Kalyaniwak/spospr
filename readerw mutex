@@ -12,7 +12,7 @@ public class ReaderWriterPrj {
     static class Reader implements Runnable {                    
     public void run() {
             try {
-                //Acquire Section
+                
                 mutex.acquire();                                      
                 readCount++;
                 if (readCount == 1) {
